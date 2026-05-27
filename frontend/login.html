@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-TODO Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a4d 0%, #2d1b4e 25%, #1a3a52 50%, #2d2854 75%, #1a1a4d 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 5;
+    }
+    .aurora {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .aurora-light {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: auroraFloat ease-in-out infinite;
+    }
+
+    .aurora-1 {
+      width: 500px;
+      height: 300px;
+      top: -100px;
+      left: -200px;
+      background: radial-gradient(ellipse at center, #ff00ff 0%, transparent 70%);
+      animation-duration: 8s;
+    }
+
+    .aurora-2 {
+      width: 400px;
+      height: 400px;
+      top: 200px;
+      right: -100px;
+      background: radial-gradient(ellipse at center, #00ffff 0%, transparent 70%);
+      animation-duration: 10s;
+      animation-delay: 2s;
+    }
+
+    .aurora-3 {
+      width: 600px;
+      height: 300px;
+      bottom: -150px;
+      left: 50%;
+      background: radial-gradient(ellipse at center, #ff1493 0%, transparent 70%);
+      animation-duration: 12s;
+      animation-delay: 4s;
+    }
+
+    @keyframes auroraFloat {
+      0%, 100% {
+        transform: translate(0, 0);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translate(30px, 30px);
+        opacity: 0.5;
+      }
+    }
+
+    .stars-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    .star-plus {
+      font-size: 20px;
+      color: white;
+      opacity: 0.6;
+      animation: twinkle 4s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .shooting-star {
+      position: absolute;
+      width: 2px;
+      height: 100px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 1), transparent);
+      animation: shoot 3s ease-in-out infinite;
+    }
+
+    .shoot-1 {
+      top: 20%;
+      left: 20%;
+      animation-delay: 0s;
+    }
+
+    .shoot-2 {
+      top: 60%;
+      right: 15%;
+      animation-delay: 1.5s;
+    }
+
+    @keyframes shoot {
+      0% {
+        transform: translateX(-100px) translateY(-100px) rotate(45deg);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(100px) translateY(100px) rotate(45deg);
+        opacity: 0;
+      }
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 200px;
+      padding: 60px 50px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      position: relative;
+      z-index: 20;
+      backdrop-filter: blur(20px);
+    }
+
+    .logo {
+      font-size: 60px;
+      margin-bottom: 20px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #2d1b4e 0%, #1a3a52 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-style: italic;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      color: #7b68a8;
+      font-size: 14px;
+      margin-bottom: 30px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 25px;
+      font-size: 14px;
+      transition: all 0.3s;
+      background: rgba(255, 255, 255, 0.9);
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    .form-input::placeholder {
+      color: #bbb;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #6495ed;
+      box-shadow: 0 0 0 3px rgba(100, 149, 237, 0.1);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(74, 144, 226, 0.4);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .signup-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .signup-link a {
+      color: #6495ed;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .signup-link a:hover {
+      color: #357abd;
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora">
+    <div class="aurora-light aurora-1"></div>
+    <div class="aurora-light aurora-2"></div>
+    <div class="aurora-light aurora-3"></div>
+  </div>
+
+  <!-- Stars -->
+  <div class="stars-bg" id="starsContainer"></div>
+
+  <!-- Shooting Stars -->
+  <div class="shooting-star shoot-1"></div>
+  <div class="shooting-star shoot-2"></div>
+
+  <div id="app">
+    <!-- Login Container -->
+    <div class="login-container">
+      <div class="login-card">
+        <div class="logo">☁️</div>
+        
+        <h1 class="title">Bienvenue !</h1>
+        <p class="subtitle">Organize your dreams</p>
+
+        <div v-show="isLogin">
+          <form @submit.prevent="handleLogin">
+            <div class="form-group">
+              <input 
+                v-model="email" 
+                type="email" 
+                class="form-input"
+                placeholder="Email"
+                required
+              >
+              <div v-if="errors.email" class="error">{{ errors.email }}</div>
+            </div>
+
+            <div class="form-group">
+              <input 
+                v-model="password" 
+                type="password" 
+                class="form-input"
+                placeholder="Mot de passe"
+                required
+              >
+              <div v-if="errors.password" class="error">{{ errors.password }}</div>
+            </div>
+
+            <button type="submit" class="login-btn">Se connecter</button>
+          </form>
+
+          <div class="signup-link">
+            Pas encore inscrit ? 
+            <a @click="isLogin = false">Créer un compte</a>
+          </div>
+        </div>
+
+        <div v-show="!isLogin">
+          <form @submit.prevent="handleSignup">
+            <div class="form-group">
+              <input 
+                v-model="firstname" 
+                type="text" 
+                class="form-input"
+                placeholder="Prénom"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <input 
+                v-model="lastname" 
+                type="text" 
+                class="form-input"
+                placeholder="Nom de famille"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <input 
+                v-model="email" 
+                type="email" 
+                class="form-input"
+                placeholder="Email"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <input 
+                v-model="password" 
+                type="password" 
+                class="form-input"
+                placeholder="Mot de passe"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <input 
+                v-model="confirmPassword" 
+                type="password" 
+                class="form-input"
+                placeholder="Confirmer mot de passe"
+                required
+              >
+              <div v-if="errors.password" class="error">{{ errors.password }}</div>
+            </div>
+
+            <button type="submit" class="login-btn" :disabled="loading">{{ loading ? 'Loading...' : "S'inscrire" }}</button>
+          </form>
+
+          <div class="signup-link">
+            Déjà inscrit ? 
+            <a @click="isLogin = true">Se connecter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    function createStars() {
+      const container = document.getElementById('starsContainer');
+      const starCount = 100;
+      
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        container.appendChild(star);
+      }
+      const plusCount = 50;
+      for (let i = 0; i < plusCount; i++) {
+        const plus = document.createElement('div');
+        plus.className = 'star-plus';
+        plus.textContent = Math.random() > 0.5 ? '+' : '✦';
+        plus.style.left = Math.random() * 100 + '%';
+        plus.style.top = Math.random() * 100 + '%';
+        plus.style.animationDelay = Math.random() * 4 + 's';
+        plus.style.position = 'absolute';
+        container.appendChild(plus);
+      }
+    }
+
+    createStars();
+
+    const API_URL = 'http://localhost:3000';
+
+    createApp({
+      data() {
+        return {
+          isLogin: true,
+          email: '',
+          password: '',
+          firstname: '',
+          lastname: '',
+          confirmPassword: '',
+          errors: {},
+          loading: false
+        }
+      },
+      methods: {
+        async handleLogin() {
+          console.log('Login clicked');
+          this.errors = {};
+          
+          if (!this.email) {
+            this.errors.email = 'Email is required';
+          }
+          if (!this.password) {
+            this.errors.password = 'Password is required';
+          }
+
+          if (Object.keys(this.errors).length > 0) {
+            console.log('Validation errors:', this.errors);
+            return;
+          }
+
+          this.loading = true;
+          try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: this.email, password: this.password })
+            });
+
+            const data = await response.json();
+            console.log('Login response:', data, 'Status:', response.status);
+
+            if (!response.ok) {
+              this.errors.password = data.msg || 'Login failed';
+              console.error('Login error:', data.msg);
+              return;
+            }
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userId', data.userId);
+            localStorage.setItem('userName', data.name || 'User');
+            window.location.href = '/index.html';
+          } catch (error) {
+            console.error('Login error:', error);
+            this.errors.password = 'Connection error: ' + error.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+        async handleSignup() {
+          console.log('Signup clicked');
+          console.log('Data:', {
+            firstname: this.firstname,
+            lastname: this.lastname,
+            email: this.email,
+            password: this.password,
+            confirmPassword: this.confirmPassword
+          });
+          this.errors = {};
+
+          if (!this.firstname) {
+            this.errors.firstname = 'First name is required';
+          }
+          if (!this.lastname) {
+            this.errors.lastname = 'Last name is required';
+          }
+          if (!this.email) {
+            this.errors.email = 'Email is required';
+          }
+          if (!this.password) {
+            this.errors.password = 'Password is required';
+          }
+          if (this.password !== this.confirmPassword) {
+            this.errors.password = 'Passwords do not match';
+          }
+
+          if (Object.keys(this.errors).length > 0) {
+            console.log('Validation errors:', this.errors);
+            return;
+          }
+
+          this.loading = true;
+          try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                email: this.email, 
+                password: this.password,
+                name: this.lastname,
+                firstname: this.firstname
+              })
+            });
+
+            const data = await response.json();
+            console.log('Signup response:', data, 'Status:', response.status);
+
+            if (!response.ok) {
+              this.errors.email = data.msg || 'Signup failed';
+              console.error('Signup error:', data.msg);
+              return;
+            }
+
+            alert('Account created! 🎉 Please login');
+            this.isLogin = true;
+            this.email = '';
+            this.password = '';
+            this.firstname = '';
+            this.lastname = '';
+            this.confirmPassword = '';
+          } catch (error) {
+            console.error('Signup error:', error);
+            this.errors.email = 'Connection error: ' + error.message;
+          } finally {
+            this.loading = false;
+          }
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

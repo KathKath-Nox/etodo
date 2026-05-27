@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-TODO</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <div class="sidebar" :class="{ open: sidebarOpen }">
+      <button class="sidebar-toggle-btn" @click="sidebarOpen = !sidebarOpen">☰</button>
+
+      <!-- User Section -->
+      <div class="user-section" @click="profileOpen = true">
+        <div class="user-avatar">
+          <img v-if="profilePic" :src="profilePic" alt="avatar" class="profile-img">
+          <span v-else>👤</span>
+        </div>
+        <div class="user-name">{{ userName }}</div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav-section">
+        <div class="nav-title">Navigation</div>
+        <div class="nav-item" :class="{ active: selectedCategory === 'Home' }" @click="selectedCategory = 'Home'">Home</div>
+        <div class="nav-item" :class="{ active: selectedCategory === 'Calendar' }" @click="selectedCategory = 'Calendar'">Calendar</div>
+      </div>
+
+      <!-- Categories -->
+      <div class="nav-section">
+        <div class="nav-title">Categories</div>
+        <div v-for="cat in categories" :key="cat" class="nav-item" :class="{ active: selectedCategory === cat }" @click="selectedCategory = cat">
+          {{ cat }}
+        </div>
+        <a href="settings.html" class="nav-item settings-btn">⚙️ Settings</a>
+      </div>
+      <button class="logout-btn" @click="logout">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <div class="header-title">My Tasks</div>
+      </div>
+
+      <div class="content">
+        <div style="flex:1;">
+
+          <!-- ADD TASK (only Home) -->
+          <div class="add-todo-section" v-if="selectedCategory === 'Home'">
+            <input v-model="newTodo.title" type="text" class="add-todo-input" placeholder="Add a new task...">
+            <textarea v-model="newTodo.description" class="add-todo-input" placeholder="Description" rows="2"></textarea>
+            <input v-model="newTodo.startTime" type="datetime-local" class="add-todo-input">
+            <input v-model="newTodo.endTime" type="datetime-local" class="add-todo-input">
+            <div class="add-todo-controls">
+              <button v-for="cat in categories" :key="cat" class="tag-btn" :class="{ active: newTodo.category === cat }" @click="newTodo.category = cat">
+                {{ cat }}
+              </button>
+              <button class="add-btn" @click="addTodo">Add Task</button>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="stats" v-if="selectedCategory !== 'Calendar'">
+            <!-- <div class="stat-card">
+              <div class="stat-number">{{ todoStats.total }}</div>
+              <div class="stat-label">Total</div>
+            </div> -->
+            <div class="stat-card">
+              <div class="stat-number">{{ todoStats.ongoing }}</div>
+              <div class="stat-label">Ongoing</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">{{ todoStats.completed }}</div>
+              <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">{{ todoStats.missed }}</div>
+              <div class="stat-label">Missed</div>
+            </div>
+          </div>
+
+          <!-- TASK LISTS (for categories & Home) -->
+          <div v-if="selectedCategory !== 'Calendar'">
+            <!-- Ongoing Tasks -->
+            <div class="todo-list-section">
+              <div class="todo-section-title">Ongoing Tasks</div>
+              <div v-if="ongoingTodos.length === 0" class="empty-state"><p>No ongoing tasks</p></div>
+              <div class="todo-list">
+                <div v-for="todo in ongoingTodos" :key="todo.id" class="todo-item" :class="{ urgent: todo.urgent }">
+                  <div class="todo-header">
+                    <input type="checkbox" @change="toggleTodo(todo)">
+                    <div class="todo-title">{{ todo.title }}</div>
+                    <button class="subtask-toggle-btn" @click="toggleSubtasks(todo)">☁️</button>
+                  </div>
+                  <div v-if="todo.description" class="todo-description">{{ todo.description }}</div>
+                  <div class="progress-container">
+                    <div class="progress-fill" :style="{ width: completedSubtasks(todo)/todo.subtasks.length*100 + '%' }"></div>
+                  </div>
+                  <div class="todo-meta">
+                    <span class="todo-tag">{{ todo.category }}</span>
+                    <span>{{ formatDate(todo.startTime) }} → {{ formatDate(todo.endTime) }}</span>
+                  </div>
+                  <div v-if="todo.showSubtasks && todo.subtasks.length > 0" class="subtasks-list">
+                    <div v-for="sub in todo.subtasks" :key="sub.title" class="subtask-item">
+                      <input type="checkbox" v-model="sub.completed" @change="saveTodos()">
+                      <span :class="{ completed: sub.completed }">{{ sub.title }}</span>
+                      <button @click="deleteSubtask(todo, sub)">✕</button>
+                    </div>
+                  </div>
+                  <button class="add-subtask-btn" @click="addSubtask(todo)">+ Subtask</button>
+                  <button class="todo-delete" @click="deleteTodo(todo.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Completed Tasks -->
+            <div class="todo-list-section" style="margin-top:30px;">
+              <div class="todo-section-title">Completed Tasks</div>
+              <div v-if="completedTodos.length === 0" class="empty-state"><p>No completed tasks</p></div>
+              <div class="todo-list">
+                <div v-for="todo in completedTodos" :key="todo.id" class="todo-item completed">
+                  <input type="checkbox" :checked="true" @change="toggleTodo(todo)">
+                  <div class="todo-title completed">{{ todo.title }}</div>
+                  <div class="todo-meta">
+                    <span class="todo-tag">{{ todo.category }}</span>
+                    <span>{{ formatDate(todo.startTime) }} → {{ formatDate(todo.endTime) }}</span>
+                  </div>
+                  <button class="todo-delete" @click="deleteTodo(todo.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CALENDAR -->
+          <div v-if="selectedCategory === 'Calendar'" class="calendar-view">
+            <div class="calendar-controls">
+              <button @click="prevWeek" class="logout-btn">Previous Week</button>
+              <button @click="nextWeek" class="logout-btn">Next Week</button>
+            </div>
+
+            <!-- Week Header -->
+            <div class="week-header">
+              <div class="time-header">Time</div>
+              <div v-for="day in weekDays" :key="day.label" class="day-header">
+                {{ day.label }} <br> {{ day.date }}
+              </div>
+            </div>
+
+            <div class="week-grid">
+              <!-- Time column -->
+              <div class="time-column">
+                <div v-for="hour in hours" :key="hour" class="time-cell">{{ hour }}</div>
+              </div>
+
+              <!-- Day columns -->
+              <div v-for="day in weekDays" :key="day.label" class="day-column">
+                <div v-for="hour in hours" :key="hour" class="hour-cell" style="position: relative;">
+                  <div v-for="todo in tasksByHour(day.dateObj, hour)" :key="todo.id" class="calendar-task"
+                       :style="{ position:'absolute', top:'0', height:(new Date(todo.endTime).getHours()-new Date(todo.startTime).getHours())*40+'px', width:'100%', zIndex:1 }">
+                    <strong>{{ todo.title }}</strong><br>
+                    <small>{{ formatDate(todo.startTime) }} → {{ formatDate(todo.endTime) }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

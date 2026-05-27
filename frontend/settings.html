@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings - E-TODO</title>
+  <link rel="stylesheet" href="settings.css" />
+  <script>
+    // Apply theme IMMEDIATELY before page renders
+    (function() {
+      console.log('Pre-loading theme...');
+      const settings = localStorage.getItem('userSettings');
+      if (settings) {
+        try {
+          const parsed = JSON.parse(settings);
+          const darkMode = parsed.darkMode !== undefined ? parsed.darkMode : true;
+          console.log('Theme from localStorage - Dark mode:', darkMode);
+          
+          const root = document.documentElement;
+          if (darkMode) {
+            root.classList.add('dark-mode');
+            root.classList.remove('light-mode');
+          } else {
+            root.classList.add('light-mode');
+            root.classList.remove('dark-mode');
+          }
+        } catch (e) {
+          console.error('Error loading theme:', e);
+        }
+      } else {
+        console.log('No settings found - using dark mode default');
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="header">
+        <h1>⚙️ Settings</h1>
+        <button class="back-btn" @click="goBack">← Back</button>
+      </div>
+
+      <div v-if="message" :class="['message', message.type]">
+        {{ message.text }}
+      </div>
+
+      <!-- Profile Picture Settings -->
+      <div class="settings-card">
+        <h2>📸 Profile Picture</h2>
+        <div class="profile-pic-section">
+          <div class="profile-pic-preview">
+            <img v-if="profilePic" :src="profilePic" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;">
+            <div v-else style="font-size: 48px;">{{ profilePicText }}</div>
+          </div>
+          <div class="profile-pic-controls">
+            <input type="file" ref="fileInput" @change="handleProfilePicChange" accept="image/*" style="display: none;">
+            <button class="btn btn-primary" @click="$refs.fileInput.click()">Upload Picture</button>
+            <button v-if="profilePic" class="btn btn-secondary" @click="removeProfilePic">Remove</button>
+            <p class="hint">Supported formats: JPG, PNG (Max 2MB)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Settings -->
+      <div class="settings-card">
+        <h2>🌙 Appearance</h2>
+        <div class="setting-group">
+          <div class="theme-toggle">
+            <span>{{ darkMode ? 'Dark Mode' : 'Light Mode' }}</span>
+            <div class="toggle-switch">
+              <label class="switch">
+                <input type="checkbox" v-model="darkMode" @change="toggleDarkMode">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="settings-card">
+        <h2>👤 Account Settings</h2>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" v-model="form.firstname" placeholder="Enter your first name">
+        </div>
+
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" v-model="form.name" placeholder="Enter your last name">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" v-model="form.email" placeholder="Enter your email">
+        </div>
+
+        <div class="form-group">
+          <label>New Password (leave empty to keep current)</label>
+          <input type="password" v-model="form.password" placeholder="Enter new password">
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" @click="updateAccount" :disabled="loading">{{ loading ? 'Saving...' : 'Save Changes' }}</button>
+          <button class="btn btn-secondary" @click="resetForm">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-card">
+        <div class="danger-zone">
+          <h3>🗑️ Danger Zone</h3>
+          <p>Deleting your account is permanent and cannot be undone. All your data will be lost.</p>
+          <button class="btn btn-danger" @click="deleteAccount" :disabled="loading">{{ loading ? 'Deleting...' : 'Delete Account' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: etodo_db
+    environment:
+      MYSQL_DATABASE: etodo
+      MYSQL_ROOT_PASSWORD: password123
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./e-todo.sql:/docker-entrypoint-initdb.d/e-todo.sql
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: etodo_api
+    ports:
+      - "3000:3000"
+    environment:
+      MYSQL_DATABASE: etodo
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: password123
+      PORT: 3000
+      SECRET: your_secret_key_here
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: etodo_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
